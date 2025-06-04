@@ -11,38 +11,36 @@ const createWindow = () => {
   });
 
   win.loadFile("pages/index.html");
-
-
 };
 
-ipcMain.handle('salvar-livros', async function(evento, titulo, autor) {
-  console.log(titulo, autor)
+// 📥 Salvar livro
+ipcMain.handle('salvar-livros', async (evento, titulo, autor) => {
+  console.log("Salvando livros:", titulo, autor);
 
-  var conexao = await mysql.createConnection({
-    host: 'Localhost',
+  const conexao = await mysql.createConnection({
+    host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'livros_db'
-  })
+    database: 'livros_db',
+  });
 
-  conexao.execute("INSERT INTO livros (titulo, autor) VALUES(?, ?)", [titulo, autor])
-})
+  await conexao.execute("INSERT INTO livros (titulo, autor) VALUES (?, ?)", [titulo, autor]);
+});
 
-
-ipcMain.handle('listar-livros', async (evento, {titulo, autor}) => {
-  console.log(titulo, autor)
-    var conexao = await mysql.createConnection({
-    host: 'Localhost',
+// 📤 Listar livros
+ipcMain.handle('listar-livros', async (evento) => {
+  const conexao = await mysql.createConnection({
+    host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'livros_db'
-  })
+    database: 'livros_db',
+  });
 
-  var query = await conexao.execute('SELECT * FROM livros')
-  console.log("Query ", query)
-  return query[0]
-  })
+  const [rows] = await conexao.execute('SELECT * FROM livros');
+  return rows;
+});
 
+// 🚀 Inicializa janela
 app.whenReady().then(() => {
   createWindow();
 });
